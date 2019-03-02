@@ -7,10 +7,9 @@
 2. setState 的过程
 3. react为什么需要用到key
 4. function Component
-5. 
+5. react 的组件如何不更新
 6. webpack plugin dll 了解吗
 7. webpack  gulp grunt 的区别
-8. 
 ### 面试官二
 1. 遇到的困难如何克服
 2. tcp/ip 协议 和http 有什么区别
@@ -22,12 +21,123 @@
 3. jquery 选择器的实现  . # 的性能
 4. jquery 事件代理的原理   捕获和冒泡的过程
 5. 了解es6 吗  如何定义一个类
-6. 跨域及如何跨域  同域名不同端口   不同协议算不算跨域
-7. 如何提高浏览器端的效率  静态资源缓存
-8.  promise的状态  异步的同步写法
-9.  for 循环 console.log 输出的结果 为什么 及如何输出 1 2 3
-10. 如何实现一个向下滑动的vue组件
-11. 有什么想问的问题
+6. 了解原型链吗
+7. 跨域及如何跨域  同源策略 同域名不同端口   不同协议算不算跨域
+   协议+域名+端口号  任一不同都是跨域 违反同源策略
+   后端跨域解决:
+        前端单独作为服务发布，势必会涉及到无法直接调用后端的接口的问题，因为浏览器是不允许跨域提交请求的。
+
+       所谓跨域访问，就是在浏览器窗口，和某个服务端通过某个协议+域名+端口号建立了会话的前提下，去使用与这三个属性任意一个不同的源提交了请求，比如:打开新窗口，iframe,xmlhttprequest，那么浏览器就认为你是跨域了，违反了浏览器的同源策略。 
+
+    　　解决此问题，w3c标准中，有针对跨域请求的规范：
+
+    　　在响应头中带上Access-Control-Allow-Origin，值是你允许跨域访问的源，比如http://www.baidu.com，注意这里只支持*（表示所有源）号或者某个源，不支持多个源，如果要实现多个源，可以自己包装一个集合，对每次的请求在集合中判断是否存在，如存在，就放到响应头中来；
+
+    　　使用Access-Control-Allow-Methods 限制允许跨域访问的http方法类型，多个以逗号隔开，比如：POST,GET,OPTIONS
+
+    　　使用Access-Control-Allow-Headers，限制允许跨域访问的http头，包含这里设置的头，才允许跨域访问 比如：foo-x
+
+    　　对于客户端在发送请求的时候，浏览器会检测如果本次请求是一个非简单的跨域请求，就会先发送一个OPTIONS的请求到后台预检一下是否支持本源的跨域，如果支持，后台就用上面提到的几个响应头信息告诉浏览器，接着浏览器会发送真正的请求到后台，否则请求将不会得到结果，浏览器会报违反同源策略的警告。header(‘Access-Control-Allow-Origin:*’);
+
+    　　关于简单跨域请求和非简单跨域请求解释如下：
+
+    　　CORS(Cross Origin Resourse-Sharing),中文意思是跨域资源共享，定义了两种跨域请求，简单跨域请求和非简单跨域请求。当一个跨域请求发送简单跨域请求包括：请求方法为HEAD，GET，POST;请求头只有4个字段，Accept，Accept-Language，Content-Language，Last-Event-ID;如果设置了Content-Type，则其值只能是application/x-www-form-urlencoded,multipart/form-data,text/plain，所以，我们设置一下content-type为其它的值，比如application/json,此次请求就会被认为是非简单跨域请求，浏览器就会提交预检请求了。
+
+    php 利用Access-Control-Allow-Origin响应头解决跨域请求:
+    在服务器响应客户端的时候，带上Access-Control-Allow-Origin头信息。有以下两种设置方式:
+
+    泛域名: (* 允许所有域名的脚本访问该资源。)
+    Access-Control-Allow-Origin: *        
+    特定域名: ( http://www.aerchi.com: 允许特定的域名访问。)
+    Access-Control-Allow-Origin: http://www.aerchi.com  
+
+    比如在PHP添加响应头信息：(表示支持所有域名访问)
+
+    header("Access-Control-Allow-Origin: *");
+
+    如下列PHP 语法设置:
+
+    // 指定允许其他域名访问
+
+    header('Access-Control-Allow-Origin:*');
+
+    // 响应类型
+
+    header('Access-Control-Allow-Methods:*');
+
+    // 响应头设置
+
+    header('Access-Control-Allow-Headers:x-requested-with,content-type');
+
+    php支持多个地址跨域访问:
+
+    $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+    $allow_origin = array(
+        'http://www.a.com',
+        'http://www.b.com'
+    );
+    if(in_array($origin, $allow_origin)){
+        header('Access-Control-Allow-Origin:'.$origin);
+        header('Access-Control-Allow-Methods:POST');
+        header('Access-Control-Allow-Headers:x-requested-with,content-type');
+    }
+    前端跨域解决: HTTP技能之同源策略
+    安全考量
+    有这种限制的主要原因就是如果没有同源策略将导致安全风险。假设用户在访问银行网站，并且没有登出。然后他又去了任意的其他网站，刚好这个网站有恶意的js代码，在后台请求银行网站的信息。因为用户目前仍然是银行站点的登陆状态，那么恶意代码就可以在银行站点做任意事情。例如，获取你的最近交易记录，创建一个新的交易等等。因为浏览器可以发送接收银行站点的session cookies，在银行站点域上。访问恶意站点的用户希望他访问的站点没有权限访问银行站点的cookie。当然确实是这样的，js不能直接获取银行站点的session cookie，但是他仍然可以向银行站点发送接收附带银行站点session cookie的请求，本质上就像一个正常用户访问银行站点一样。关于发送的新交易，甚至银行站点的CSRF（跨站请求伪造）防护都无能无力，因为脚本可以轻易的实现正常用户一样的行为。所以如果你需要session或者需要登陆时，所有网站都面临这个问题。如果上例中的银行站点只提供公开数据，你就不能触发任意东西，这样的就不会有危险了，这些就是同源策略防护的。当然，如果两个站点是同一个组织的或者彼此互相信任，那么就没有这种危险了。
+
+    规避同源策略
+    在某些情况下同源策略太严格了，给拥有多个子域的大型网站带来问题。下面就是解决这种问题的技术：
+
+    document.domain属性
+    如果两个window或者frames包含的脚本可以把domain设置成一样的值，那么就可以规避同源策略，每个window之间可以互相沟通。例如，orders.example.com下页面的脚本和catalog.example.com下页面的脚本可以设置他们的document.domain属性为example.com，从而让这两个站点下面的文档看起来像在同源下，然后就可以让每个文档读取另一个文档的属性。这种方式也不是一直都有用，因为端口号是在内部保存的，有可能被保存成null。换句话说，example.com的端口号80，在我们更新document.domain属性的时候可能会变成null。为null的端口可能不被认为是80，这主要依赖浏览器实现。
+
+    跨域资源共享
+    这种方式使用了一个新的Origin请求头和一个新的Access-Control-Allow-Origin响应头扩展了HTTP。允许服务端设置Access-Control-Allow-Origin头标识哪些站点可以请求文件，或者设置Access-Control-Allow-Origin头为"*"，允许任意站点访问文件。浏览器，例如Firefox3.5，Safari4，IE10使用这个头允许跨域HTTP请求。
+
+    跨文档通信
+    这种方式允许一个页面的脚本发送文本信息到另一个页面的脚本中，不管脚本是否跨域。在一个window对象上调用postMessage()会异步的触发window上的onmessage事件，然后触发定义好的事件处理方法。一个页面上的脚本仍然不能直接访问另外一个页面上的方法或者变量，但是他们可以安全的通过消息传递技术交流。
+
+    JSONP
+    JOSNP允许页面接受另一个域的JSON数据，通过在页面增加一个可以从其它域加载带有回调的JSON响应的<script>标签。
+    jsonp的产生:
+
+    1.AJAX直接请求普通文件存在跨域无权限访问的问题,不管是静态页面也好.
+
+    2.不过我们在调用js文件的时候又不受跨域影响,比如引入jquery框架的,或者是调用相片的时候
+
+    3.凡是拥有scr这个属性的标签都可以跨域例如<script><img><iframe>
+
+    4.如果想通过纯web端跨域访问数据只有一种可能,那就是把远程服务器上的数据装进js格式的文件里.
+
+    5.而json又是一个轻量级的数据格式,还被js原生支持
+
+    6.为了便于客户端使用数据，逐渐形成了一种非正式传输协议，人们把它称作JSONP，该协议的一个要点就是允许用户传递一个callback 参数给服务端，
+
+    WebSocket
+    现代浏览器允许脚本直连一个WebSocket地址而不管同源策略。然而，使用WebSocket URI的时候，在请求中插入Origin头就可以标识脚本请求的源。为了确保跨站安全，WebSocket服务器必须根据允许接受请求的白名单中的源列表比较头数据。
+
+    个例以及异常
+    在一些个例中，例如哪些没有明确定义主机名或者端口的协议(file:,data:,等)，同源检查以及相关机制如何运作没有很好的定义。这在历史上导致了很多安全问题，例如任意本地存储的HTML文件不能访问磁盘上的其他文件，也不能与任何网络上的站点通信。
+
+    另外，很多遗留的跨域操作，早期是不受同源策略限制的，例如<script>的跨域请求以及表单POST提交。
+
+    最后，某些类型的攻击，例如DNS重新绑定，服务端代理，可以破坏主机名检查，让流氓页面可以直接通过地址与站点通信，尽管地址不是同源的。这种攻击的影响仅限于某些特殊情况下，例如，如果浏览器仍然相信正在通信的攻击者的站点，然后没有公开第三方cookie或者其他敏感信息给攻击者。
+
+    变通方法
+    为了让开发者可以在可控情况下绕过同源策略，一些"hacks"方法可以被用来在不同域的文档之间传输数据，例如fragment identifier ，window.name属性。根据HTML5标准，一个postMessage接口可以实现这样的功能，但是只有最新的浏览器才支持。JSONP也可以用来保证通过类似Ajax的方式访问跨域资源。
+    同源策略限制了不同源之间的交互，但是有人也许会有疑问，我们以前在写代码的时候也常常会引用其他域名的js文件，样式文件，图片文件什么的，没看到限制啊，这个定义是不是错了。其实不然，同源策略限制的不同源之间的交互主要针对的是js中的XMLHttpRequest等请求，下面这些情况是完全不受同源策略限制的。
+
+    页面中的链接，重定向以及表单提交是不会受到同源策略限制的。链接就不用说了，导航网站上的链接都是链接到其他站点的。而你在域名www.foo.com下面提交一个表单到www.bar.com是完全可以的。
+    跨域资源嵌入是允许的，当然，浏览器限制了Javascript不能读写加载的内容。如前面提到的嵌入的<script src="..."></script>，<img>，<link>，<iframe>等。当然，如果要阻止iframe嵌入我们网站的资源(页面或者js等)，我们可以在web服务器加上一个X-Frame-Options DENY头部来限制。nginx就可以这样设置add_header X-Frame-Options DENY;。
+    既然有这么多的情况是没有同源策略限制的，那么通常的跨域问题从何而来呢？转到下一节跨域问题。
+
+    2 跨域问题
+    这一节来讨论下跨域问题，当然前置条件是我们在WEB服务器或者服务端脚本中设置ACCESS-CONTROL-ALLOW-ORIGIN头部，如果设置了这些头部并允许某些域名跨域访问，则浏览器就会跳过同源策略的限制返回对应的内容。此外，如果你不是通过浏览器去获取资源，比如你通过一个python脚本去调用接口或者获取js文件，也不在这个限制之内。
+8. 如何提高浏览器端的效率  静态资源缓存
+9.  promise的状态  异步的同步写法
+10. for 循环 console.log 输出的结果 为什么 及如何输出 1 2 3
+11. 如何实现一个向下滑动的vue组件
+12. 有什么想问的问题
 
 
 
