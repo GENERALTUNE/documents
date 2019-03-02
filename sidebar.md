@@ -7,6 +7,7 @@
 3. [前端面试材料](#docs/interview_fe)
 4. [移动端面试材料](#docs/interview_mobile) 
 5. [java基础知识](#docs/java_note) 
+6. [高级前端面试材料总结](#docs/interview_advanced_fe)
 
 <!-- 1. [前言](#README)
 1. [ECMAScript 6简介](#docs/intro)
